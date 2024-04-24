@@ -4,7 +4,7 @@ CREATE TABLE studentsPlaceholderData (
 	slno int default null,
         degreeWithBranch varchar(300) default null,
         candidateName varchar(300) default null,
-        registerNumber varchar(300) default null,
+        registerNumber bigint default null,
         examDateAndSession varchar(300) default null,
         examCentreCode int default null,
         subjectCode varchar(100) default null,
