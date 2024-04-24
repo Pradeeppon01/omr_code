@@ -1,6 +1,7 @@
 import time
 import csv
 import mysql.connector
+import random
 from random import randint
 from pprint import pprint
 from datetime import datetime
@@ -67,6 +68,19 @@ def generate_barcode_number():
         return randint(0,10**BARCODE_LENGTH)
     except Exception as err:
         print("ERROR : Error occured in the generate barcode number function : ",err)
+
+
+def generate_barcode_new_logic():
+    print(">> Into the generate barcode new logic")
+    try:
+        barcode_batch = str(random.randint(10, 99)) + str(random.randint(10, 99))
+        random_number = ''.join(str(random.randint(0, 9)) for _ in range(9))
+        number = barcode_batch + random_number
+        checksum = sum(int(digit) for digit in number) % 10
+        number += str(checksum)
+        return number
+    except Exception as err:
+        print("ERROR : Error occured in the generate barcode new logic : ",err)
 
 
 def record_barcode_data(barcode,sno,label,cursor):
