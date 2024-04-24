@@ -129,7 +129,7 @@ def initiate_barcode_generation():
             while iteration < 10000:
                 print("Iteration : ",iteration)
                 pprint(row)
-                db.start_transaction()
+                #db.start_transaction()
                 slno = row.get("SL.NO")
                 slno_records = dbSelector(f"SELECT * FROM {PLACEHOLDER_RECORD_TABLE} WHERE slno = {slno}",cursor)  #created index for it
                 if slno_records:
@@ -143,7 +143,7 @@ def initiate_barcode_generation():
                     print("BARCODE : ",barcode)
                     while barcode_existence:
                         barcode = generate_barcode_number()
-                        barcode_existence = check_barcode_existence(barcode,cursor)
+                        barcode_existence = check_barcode_existence(barcode,cursor)  #created index for it
                     barcode_label = f"BARCODE{barcode_generated_count+1}"
                     print(barcode_label, " : ",barcode)
                     row[barcode_label]=barcode
