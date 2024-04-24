@@ -18,6 +18,7 @@ BARCODE_GENERATION_COUNT=10
 CSV_FILE_PATH = "studentData.csv"
 BATCH="24"
 BARCODE_TEMPLATE="1{barcode_no}"
+SERIAL_NO_RECORD_TABLE="serialNoData"
 
 def db_connector():
     print(">> Into the function of db connector")
@@ -102,11 +103,11 @@ def record_barcode_data(barcode,sno,label,cursor):
         print("ERROR : Error occured in the record barcode data function : ",err)
 
 
-def record_placeholder_data(data,cursor):
+def record_placeholder_data(data,current_record_id,cursor):
     print(">> Into the record placeholder data")
     try:
-        insert_query = f"INSERT INTO {PLACEHOLDER_RECORD_TABLE} (slno,degreeWithBranch,candidateName,registerNumber,examDateAndSession,examCentreCode,subjectCode,subjectTitle,questionCode,barCode1,barCode2,barCode3,barCode4,barCode5,barCode6,barCode7,barCode8,barCode9,barCode10) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" 
-        insert_values = (data.get("SL.NO"),data.get("DEGREE_WITH_BRANCH"),data.get("CANDIDATE_NAME"),data.get("REGISTER_NUMBER"),data.get("EXAM_DATE_&_SESSION"),data.get("EXAM_CENTER_CODE"),data.get("SUBJECT_CODE"),data.get("SUBJECT_TITLE"),data.get("QUESTION_CODE"),data.get("BARCODE1"),data.get("BARCODE2"),data.get("BARCODE3"),data.get("BARCODE4"),data.get("BARCODE5"),data.get("BARCODE6"),data.get("BARCODE7"),data.get("BARCODE8"),data.get("BARCODE9"),data.get("BARCODE10"))
+        insert_query = f"INSERT INTO {PLACEHOLDER_RECORD_TABLE} (sno,slno,degreeWithBranch,candidateName,registerNumber,examDateAndSession,examCentreCode,subjectCode,subjectTitle,questionCode,barCode1,barCode2,barCode3,barCode4,barCode5,barCode6,barCode7,barCode8,barCode9,barCode10) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" 
+        insert_values = (current_record_id,data.get("SL.NO"),data.get("DEGREE_WITH_BRANCH"),data.get("CANDIDATE_NAME"),data.get("REGISTER_NUMBER"),data.get("EXAM_DATE_&_SESSION"),data.get("EXAM_CENTER_CODE"),data.get("SUBJECT_CODE"),data.get("SUBJECT_TITLE"),data.get("QUESTION_CODE"),data.get("BARCODE1"),data.get("BARCODE2"),data.get("BARCODE3"),data.get("BARCODE4"),data.get("BARCODE5"),data.get("BARCODE6"),data.get("BARCODE7"),data.get("BARCODE8"),data.get("BARCODE9"),data.get("BARCODE10"))
         dbExecutor(insert_query,insert_values,cursor)
     except Exception as err:
         print("ERROR : Error occured in the record placeholder data : ",err)
@@ -126,6 +127,7 @@ def initiate_barcode_generation():
             cursor = db.cursor(dictionary=True)
             print("Database connection time :: ",(datetime.now()-start_time).total_seconds()*1000)
             last_record_data = dbSelector(f"SELECT MAX(sno) AS LAST_ID FROM {PLACEHOLDER_RECORD_TABLE}",cursor)  #to get from another table
+            #last_record_data = dbSelector(f"SELECT serialNo as LAST_ID FROM {SERIAL_NO_RECORD_TABLE} WHERE id=1)
             if last_record_data:
                 print("last record data : ",last_record_data)
                 last_record_id = last_record_data.get("LAST_ID")
@@ -167,7 +169,7 @@ def initiate_barcode_generation():
                 print("Total time difference till barcode insert difference : ",(datetime.now()-loop_start).total_seconds()*1000)
                 after_barcode_insert_start = datetime.now()
                 pprint(row)
-                record_placeholder_data(row,cursor)
+                record_placeholder_data(row,current_record_id,cursor)
                 current_record_id+=1
                 after_barcode_insert_end = datetime.now()
                 print("After barcode :: ",(after_barcode_insert_end-after_barcode_insert_start).total_seconds()*1000)
@@ -177,6 +179,7 @@ def initiate_barcode_generation():
                 print("Commit difference : ",(commit_end-commit_start).total_seconds()*1000)
                 loop_end = datetime.now()
                 print("Loop difference :: ",(loop_end-loop_start).total_seconds()*1000)
+                #dbExecutor(f"UPDATE {SERIAL_NO_RECORD_TABLE} SET serialNo = {barcode_generated_count} WHERE id = 1")
             f.close()
         end_time = datetime.now()
         difference = end_time - start_time
@@ -188,6 +191,7 @@ def initiate_barcode_generation():
             cursor.close()
         if 'db' in locals():
             db.close()
+            
 
 if __name__ == "__main__":
     initiate_barcode_generation()

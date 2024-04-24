@@ -3,7 +3,7 @@ DROP TABLE barcodeData;
 
 
 CREATE TABLE studentsPlaceholderData (
-	sno int auto_increment primary key,
+	sno int primary key,
 	slno int default null,
         degreeWithBranch varchar(300) default null,
         candidateName varchar(300) default null,
@@ -39,6 +39,12 @@ CREATE TABLE barcodeData (
 	barcode bigint primary key,
 	barcodeUsedSno bigint default null,
 	barcodeLabel varchar(300) default null
+);
+
+
+CREATE TABLE serialNoData(
+        id int auto_increment primary key,
+        serialNo int default 1
 );
 
 
