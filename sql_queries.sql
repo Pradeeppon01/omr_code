@@ -29,7 +29,7 @@ CREATE TABLE studentsPlaceholderData (
         qrCode7 bigint default null,
         qrCode8 bigint default null,
         qrCode9 bigint default null,
-        qrCode10 bigint default null,
+        qrCode10 bigint default null
 );
 
 CREATE TABLE barcodeData (
@@ -45,5 +45,5 @@ CREATE TABLE serialNoData(
 );
 
 
-CREATE UNIQUE INDEX barcodeIndex on barchodeData(barcode);
+CREATE UNIQUE INDEX barcodeIndex on barcodeData(barcode);
 CREATE UNIQUE INDEX slnoIndex on studentsPlaceholderData(slno);
