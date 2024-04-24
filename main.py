@@ -8,14 +8,16 @@ from datetime import datetime
 
 #constants
 BARCODE_LENGTH=14
-DB_USER="root"
+DB_USER="rootuser"
 DB_PASSWORD="1234"
-DB_DATABASE="omr_data"
+DB_DATABASE="chrome_extension"
 DB_HOST="localhost"
 PLACEHOLDER_RECORD_TABLE = "studentsPlaceholderData"
 BARCODE_RECORD_TABLE = "barcodeData"
 BARCODE_GENERATION_COUNT=10
 CSV_FILE_PATH = "studentData.csv"
+BATCH="24"
+BARCODE_TEMPLATE="1{barcode_no}"
 
 def db_connector():
     print(">> Into the function of db connector")
@@ -35,9 +37,13 @@ def db_connector():
 def dbSelector(query,cursor):
     print(">> Into the function of dbSelector")
     try:
+        selector_start = datetime.now()
         cursor.execute(query)
         print(cursor.statement)
-        return cursor.fetchall()[0]
+        result = cursor.fetchone()
+        selector_end = datetime.now()
+        print("select difference in seconds : ",(selector_end-selector_start).total_seconds()*1000, "Query : ",cursor.statement)
+        return result
     except Exception as err:
         print("ERROR : Error occured int the dbSelector function : ",err)
         return None
@@ -46,7 +52,10 @@ def dbSelector(query,cursor):
 def dbExecutor(query,values,cursor):
     print(">> Into the function of dbExecutor")
     try:
+        executor_start = datetime.now()
         cursor.execute(query,values)
+        executor_end = datetime.now()
+        print("Execute difference in seconds : ",(executor_end - executor_start).total_seconds()*1000," Query : ",cursor.statement)
         print("Query Executed : ",cursor.statement)
     except Exception as err:
         print("ERROR : Error occured int the dbExecutor function : ",err)
@@ -71,12 +80,12 @@ def generate_barcode_number():
         print("ERROR : Error occured in the generate barcode number function : ",err)
 
 
-def generate_barcode_new_logic(barcode_no,batch):
+def generate_barcode_new_logic(barcode_no):
     print(">> Into the generate barcode new logic")
     try:
         barcode_batch = str(random.randint(10, 99)) + str(random.randint(10, 99))
         random_number = ''.join(str(random.randint(0, 9)) for _ in range(9))
-        number = barcode_no + batch + random_number
+        number = BARCODE_TEMPLATE.format(barcode_no=barcode_no) + BATCH + random_number
         checksum = sum(int(digit) for digit in number) % 10
         number += str(checksum)
         return number
@@ -115,6 +124,7 @@ def initiate_barcode_generation():
         if db_response.get("status") == "success":
             db = db_response.get("db")
             cursor = db.cursor(dictionary=True)
+            print("Database connection time :: ",(datetime.now()-start_time).total_seconds()*1000)
             last_record_data = dbSelector(f"SELECT MAX(sno) AS LAST_ID FROM {PLACEHOLDER_RECORD_TABLE}",cursor)  #to get from another table
             if last_record_data:
                 print("last record data : ",last_record_data)
@@ -123,22 +133,25 @@ def initiate_barcode_generation():
                     current_record_id = int(last_record_id)+1
                 else:
                     current_record_id = 1
-            for index,rows in enumerate(csv_reader):
-                row = rows 
-            iteration = 0 
-            while iteration < 10000:
-                print("Iteration : ",iteration)
+            for index,row in enumerate(csv_reader):
+                print("\n"*1)
+                print("INDEX : //////// ",index)
+                print("\n"*1)
+                loop_start = datetime.now()
                 pprint(row)
                 #db.start_transaction()
                 slno = row.get("SL.NO")
+                print("Before slno records search ://////////// ",(datetime.now()-loop_start).total_seconds()*1000)
                 slno_records = dbSelector(f"SELECT * FROM {PLACEHOLDER_RECORD_TABLE} WHERE slno = {slno}",cursor)  #created index for it
+                print("after slno records search ://////////// ",(datetime.now()-loop_start).total_seconds()*1000)
                 if slno_records:
-                    #continue
-                    pass
+                    continue
                 print("After slno records")
                 barcode_generated_count = 0
+                barcode_insert_start = datetime.now()
+                print("difference before while barcode start /////// : ",(datetime.now()-loop_start).total_seconds()*1000)
                 while barcode_generated_count < BARCODE_GENERATION_COUNT:
-                    barcode = generate_barcode_number()
+                    barcode = generate_barcode_new_logic(barcode_generated_count)
                     barcode_existence = check_barcode_existence(barcode,cursor)
                     print("BARCODE : ",barcode)
                     while barcode_existence:
@@ -148,17 +161,26 @@ def initiate_barcode_generation():
                     print(barcode_label, " : ",barcode)
                     row[barcode_label]=barcode
                     barcode_generated_count += 1
-                    record_barcode_data(barcode,current_record_id,barcode_label,cursor)
+                    record_barcode_data(barcode,current_record_id,barcode_generated_count,cursor)
+                barcode_insert_end = datetime.now()
+                print("Barcode insert difference : ",(barcode_insert_end - barcode_insert_start).total_seconds()*1000)
+                print("Total time difference till barcode insert difference : ",(datetime.now()-loop_start).total_seconds()*1000)
+                after_barcode_insert_start = datetime.now()
                 pprint(row)
                 record_placeholder_data(row,cursor)
-                iteration+=1
                 current_record_id+=1
+                after_barcode_insert_end = datetime.now()
+                print("After barcode :: ",(after_barcode_insert_end-after_barcode_insert_start).total_seconds()*1000)
+                commit_start = datetime.now()
                 db.commit()
+                commit_end = datetime.now()
+                print("Commit difference : ",(commit_end-commit_start).total_seconds()*1000)
+                loop_end = datetime.now()
+                print("Loop difference :: ",(loop_end-loop_start).total_seconds()*1000)
             f.close()
         end_time = datetime.now()
         difference = end_time - start_time
-        print("Difference is : ",difference)
-        print("Difference in seconds : ",difference.seconds)
+        print("Difference for whole process : ",difference.seconds)
     except Exception as err:
         print("ERROR :: Error occured in the initiate barcode generation Function : ",err)
     finally:
@@ -169,3 +191,4 @@ def initiate_barcode_generation():
 
 if __name__ == "__main__":
     initiate_barcode_generation()
+

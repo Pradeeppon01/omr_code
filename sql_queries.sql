@@ -1,3 +1,7 @@
+DROP TABLE studentsPlaceholderData;
+DROP TABLE barcodeData;
+
+
 CREATE TABLE studentsPlaceholderData (
 	sno int auto_increment primary key,
 	slno int default null,
@@ -18,7 +22,17 @@ CREATE TABLE studentsPlaceholderData (
         barCode7 bigint default null,
         barCode8 bigint default null,
         barCode9 bigint default null,
-        barCode10 bigint default null	
+        barCode10 bigint default null,
+        qrCode1 bigint default null,
+        qrCode2 bigint default null,
+        qrCode3 bigint default null,
+        qrCode4 bigint default null,
+        qrCode5 bigint default null,
+        qrCode6 bigint default null,
+        qrCode7 bigint default null,
+        qrCode8 bigint default null,
+        qrCode9 bigint default null,
+        qrCode10 bigint default null,
 );
 
 CREATE TABLE barcodeData (
@@ -26,3 +40,7 @@ CREATE TABLE barcodeData (
 	barcodeUsedSno bigint default null,
 	barcodeLabel varchar(300) default null
 );
+
+
+CREATE UNIQUE INDEX barcodeIndex on barchodeData(barcode);
+CREATE UNIQUE INDEX slnoIndex on studentsPlaceholderData(slno);
