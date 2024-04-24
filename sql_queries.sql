@@ -39,9 +39,8 @@ CREATE TABLE barcodeData (
 );
 
 
-CREATE TABLE serialNoData(
-        id int auto_increment primary key,
-        serialNo int default 1
+CREATE TABLE serialNoMaxData(
+        serialNoMax int primary key default 1
 );
 
 

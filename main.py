@@ -18,7 +18,7 @@ BARCODE_GENERATION_COUNT=10
 CSV_FILE_PATH = "studentData.csv"
 BATCH="24"
 BARCODE_TEMPLATE="1{barcode_no}"
-SERIAL_NO_RECORD_TABLE="serialNoData"
+SERIAL_NO_RECORD_TABLE="serialNoMaxData"
 
 def db_connector():
     print(">> Into the function of db connector")
@@ -126,8 +126,8 @@ def initiate_barcode_generation():
             db = db_response.get("db")
             cursor = db.cursor(dictionary=True)
             print("Database connection time :: ",(datetime.now()-start_time).total_seconds()*1000)
-            last_record_data = dbSelector(f"SELECT MAX(sno) AS LAST_ID FROM {PLACEHOLDER_RECORD_TABLE}",cursor)  #to get from another table
-            #last_record_data = dbSelector(f"SELECT serialNo as LAST_ID FROM {SERIAL_NO_RECORD_TABLE} WHERE id=1)
+            #last_record_data = dbSelector(f"SELECT MAX(sno) AS LAST_ID FROM {PLACEHOLDER_RECORD_TABLE}",cursor)  #to get from another table
+            last_record_data = dbSelector(f"SELECT serialNoMax as LAST_ID FROM {SERIAL_NO_RECORD_TABLE}",cursor)
             if last_record_data:
                 print("last record data : ",last_record_data)
                 last_record_id = last_record_data.get("LAST_ID")
@@ -179,7 +179,7 @@ def initiate_barcode_generation():
                 print("Commit difference : ",(commit_end-commit_start).total_seconds()*1000)
                 loop_end = datetime.now()
                 print("Loop difference :: ",(loop_end-loop_start).total_seconds()*1000)
-                #dbExecutor(f"UPDATE {SERIAL_NO_RECORD_TABLE} SET serialNo = {barcode_generated_count} WHERE id = 1")
+                dbExecutor(f"UPDATE {SERIAL_NO_RECORD_TABLE} SET serialNoMax = {barcode_generated_count}")
             f.close()
         end_time = datetime.now()
         difference = end_time - start_time
