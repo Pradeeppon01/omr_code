@@ -1,0 +1,11 @@
+#constants
+BARCODE_LENGTH=14
+PLACEHOLDER_RECORD_TABLE = "studentsPlaceholderData"
+BARCODE_RECORD_TABLE = "barcodeData"
+BARCODE_GENERATION_COUNT=10
+#CSV_FILE_PATH = "studentData.csv"
+CSV_FILE_PATH = "student_subject_list_3.csv"
+BATCH="24"
+BARCODE_TEMPLATE="1{barcode_no}"
+SERIAL_NO_RECORD_TABLE="serialNoMaxData"
+QRCODE_ADDITION_CONSTANT=11
