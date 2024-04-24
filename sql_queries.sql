@@ -1,6 +1,3 @@
-DROP TABLE studentsPlaceholderData;
-DROP TABLE barcodeData;
-
 
 CREATE TABLE studentsPlaceholderData (
 	sno int primary key,
