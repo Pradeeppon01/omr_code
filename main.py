@@ -128,6 +128,7 @@ def initiate_barcode_generation():
             print("Database connection time :: ",(datetime.now()-start_time).total_seconds()*1000)
             #last_record_data = dbSelector(f"SELECT MAX(sno) AS LAST_ID FROM {PLACEHOLDER_RECORD_TABLE}",cursor)  #to get from another table
             last_record_data = dbSelector(f"SELECT serialNoMax as LAST_ID FROM {SERIAL_NO_RECORD_TABLE}",cursor)
+            print("Last record data : ",last_record_data)
             if last_record_data:
                 print("last record data : ",last_record_data)
                 last_record_id = last_record_data.get("LAST_ID")
@@ -170,6 +171,7 @@ def initiate_barcode_generation():
                 after_barcode_insert_start = datetime.now()
                 pprint(row)
                 record_placeholder_data(row,current_record_id,cursor)
+                dbExecutor(f"UPDATE {SERIAL_NO_RECORD_TABLE} SET serialNoMax = %s",(current_record_id,),cursor)
                 current_record_id+=1
                 after_barcode_insert_end = datetime.now()
                 print("After barcode :: ",(after_barcode_insert_end-after_barcode_insert_start).total_seconds()*1000)
@@ -179,7 +181,6 @@ def initiate_barcode_generation():
                 print("Commit difference : ",(commit_end-commit_start).total_seconds()*1000)
                 loop_end = datetime.now()
                 print("Loop difference :: ",(loop_end-loop_start).total_seconds()*1000)
-                dbExecutor(f"UPDATE {SERIAL_NO_RECORD_TABLE} SET serialNoMax = {barcode_generated_count}")
             f.close()
         end_time = datetime.now()
         difference = end_time - start_time
@@ -195,4 +196,5 @@ def initiate_barcode_generation():
 
 if __name__ == "__main__":
     initiate_barcode_generation()
+
 
