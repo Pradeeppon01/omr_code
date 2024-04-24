@@ -15,6 +15,7 @@ DB_HOST="localhost"
 PLACEHOLDER_RECORD_TABLE = "studentsPlaceholderData"
 BARCODE_RECORD_TABLE = "barcodeData"
 BARCODE_GENERATION_COUNT=10
+CSV_FILE_PATH = "studentData.csv"
 
 def db_connector():
     print(">> Into the function of db connector")
@@ -70,12 +71,12 @@ def generate_barcode_number():
         print("ERROR : Error occured in the generate barcode number function : ",err)
 
 
-def generate_barcode_new_logic():
+def generate_barcode_new_logic(barcode_no,batch):
     print(">> Into the generate barcode new logic")
     try:
         barcode_batch = str(random.randint(10, 99)) + str(random.randint(10, 99))
         random_number = ''.join(str(random.randint(0, 9)) for _ in range(9))
-        number = barcode_batch + random_number
+        number = barcode_no + batch + random_number
         checksum = sum(int(digit) for digit in number) % 10
         number += str(checksum)
         return number
@@ -105,8 +106,7 @@ def record_placeholder_data(data,cursor):
 def initiate_barcode_generation():
     print(">> Into the initiate barcode generation function")
     try:
-        csv_file_path = "studentData.csv"
-        f = open(csv_file_path,"r+") 
+        f = open(CSV_FILE_PATH,"r+") 
         csv_reader = csv.DictReader(f)
         index = 0
         start_time = datetime.now()
@@ -143,7 +143,7 @@ def initiate_barcode_generation():
                     print("BARCODE : ",barcode)
                     while barcode_existence:
                         barcode = generate_barcode_number()
-                        barcode_existence = check_barcode_existence(barcode,cursor)  #created index for it
+                        barcode_existence = check_barcode_existence(barcode,cursor)
                     barcode_label = f"BARCODE{barcode_generated_count+1}"
                     print(barcode_label, " : ",barcode)
                     row[barcode_label]=barcode
